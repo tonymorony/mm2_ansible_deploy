@@ -1,0 +1,15 @@
+---
+# Basic vars available for all nodes
+
+rpcpass: "your_rpc_password"
+mm2_tag: "beta-2.0.2179"
+mm2_arch: "mm2-8c2bf3f91-Linux-Debug.zip"
+mm2_link:
+ "https://github.com/KomodoPlatform/atomicDEX-API/releases/download/{{ mm2_tag }}/{{ mm2_arch }}"
+node_exporter_tag: "v1.0.1"
+node_exporter_arch: "node_exporter-1.0.1.linux-amd64.tar.gz"
+node_exporter_link:
+ "https://github.com/prometheus/node_exporter/releases/download/{{ node_exporter_tag }}/{{ node_exporter_arch }}"
+coins:
+ "https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins"
+deployment_playbook_version: 0.1

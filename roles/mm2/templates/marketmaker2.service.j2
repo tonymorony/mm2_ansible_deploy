@@ -1,0 +1,16 @@
+[Unit]
+Description=atomicDEX-API
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Environment=MM_CONF_PATH={{ ansible_env['PWD'] }}/mm2/MM2.json
+Environment=MM_COINS_PATH={{ ansible_env['PWD'] }}/mm2/coins
+Environment=MM_LOG={{ ansible_env['PWD'] }}/mm2/mm.log
+User=root
+Group=root
+Type=simple
+ExecStart=/usr/local/bin/mm2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,123 @@
+---
+- name: Apt Upgrade and Install extras
+  block:
+    - name: Upgrade dist
+      become: true
+      apt:
+        upgrade: dist
+        update_cache: true
+
+    - name: Install packages
+      become: true
+      apt:
+        update_cache: true
+        state: latest
+        pkg:
+          - zip
+          - unzip
+          - wget
+          - ntp
+          - nginx
+
+- name: Start NTP service
+  become: true
+  service: name=ntp state=started enabled=yes
+
+- name: Deploy marketmaker2
+  block:
+    - name: Download mm2 archive from github
+      get_url:
+        url: "{{ mm2_link }}"
+        dest: "{{ ansible_env['HOME'] }}"
+
+    - name: Extract mm2 binary from archive
+      shell: |
+        if [ ! -f "{{ ansible_env['HOME'] }}/mm2/mm2" ]; then
+          unzip -o {{ mm2_arch | quote }} -d ./mm2
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Download latest coins file
+      get_url:
+        url: "{{ coins }}"
+        dest: "{{ ansible_env['HOME'] }}/mm2"
+
+    - name: Set mm2 config
+      template: src=MM2.json.j2 dest={{ ansible_env['PWD'] }}/mm2/MM2.json
+      notify: restart marketmaker2
+
+    - name: Prepare mm2 log file
+      file:
+        path: "{{ ansible_env['HOME'] }}/mm2/mm.log"
+        state: touch
+
+    - name: Create mm2 binary link
+      become: true
+      file:
+        src: "{{ ansible_env['HOME'] }}/mm2/mm2"
+        dest: /usr/local/bin/mm2
+        state: link
+
+    - name: Prepare mm2 service
+      become: true
+      template: src=marketmaker2.service.j2 dest=/etc/systemd/system/marketmaker2.service
+
+    - name: Start mm2 service
+      become: true
+      service: name=marketmaker2 state=started enabled=yes
+
+- name: Setup Nginx proxy for DEX metrics
+  block:
+    - name: Disable default site
+      become: true
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Copy Nginx config
+      become: true
+      template: src=prometheus.conf.j2 dest=/etc/nginx/sites-available/prometheus.conf
+      notify: restart nginx
+
+    - name: Enable Nginx Proxy config
+      become: true
+      file:
+        src: /etc/nginx/sites-available/prometheus.conf
+        dest: /etc/nginx/sites-enabled/prometheus.conf
+        state: link
+
+    - name: Start Nginx service
+      become: true
+      service: name=nginx state=started enabled=yes
+
+- name: Setup NodeExporter
+  block:
+    - name: Download NodeExporter
+      get_url:
+        url: "{{ node_exporter_link }}"
+        dest: "{{ ansible_env['HOME'] }}"
+
+    - name: Extract node_exporter from archive
+      shell: |
+        if [ ! -f "{{ ansible_env['HOME'] }}/node_exporter/node_exporter" ]; then
+          mkdir node_exporter
+          tar xvzf {{ node_exporter_arch | quote }} -C node_exporter --strip-components=1
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Create node_exporter binary link
+      become: true
+      file:
+        src: "{{ ansible_env['HOME'] }}/node_exporter/node_exporter"
+        dest: /usr/local/bin/node_exporter
+        state: link
+
+    - name: Set NodeExporter service
+      become: true
+      template: src=nodeexporter.service.j2 dest=/etc/systemd/system/nodeexporter.service
+
+    - name: Start NodeExporter service
+      become: true
+      service: name=nodeexporter state=started enabled=yes

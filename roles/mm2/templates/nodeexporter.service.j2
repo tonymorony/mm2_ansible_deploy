@@ -1,0 +1,13 @@
+[Unit]
+Description=NodeExporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ ansible_env['USER'] }}
+Group={{ ansible_env['USER'] }}
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
