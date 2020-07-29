@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - name: Get mm2 processes
+      shell: "ps -ef | grep -v grep | grep -w mm2 | awk '{print $2}'"
+      register: running_processes
+
+    - name: Kill running processes
+      shell: "kill {{ item }}"
+      with_items: "{{ running_processes.stdout_lines }}"
