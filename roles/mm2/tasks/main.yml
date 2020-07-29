@@ -25,18 +25,41 @@
 
 - name: Deploy marketmaker2
   block:
+    - name: Copy local mm2 archive to remote
+      copy:
+        src: ./mm2.tar.gz
+        dest: "{{ ansible_env['HOME'] }}"
+        mode: "755"
+        backup: yes
+      when: {{ local }} == "true"
+
     - name: Download mm2 archive from github
       get_url:
         url: "{{ mm2_link }}"
         dest: "{{ ansible_env['HOME'] }}"
+      when: {{ local }} == "false"
 
-    - name: Extract mm2 binary from archive
+    - name: Extract mm2 binary from local archive
+      shell: |
+        if [ ! -f "{{ ansible_env['HOME'] }}/mm2/mm2" ]; then
+          mkdir mm2
+          tar xvzf ./mm2.tar.gz -C mm2
+        fi
+      args:
+        executable: /bin/bash
+      when: {{ local }} == "true"
+      notify: restart marketmaker2
+
+    - name: Extract mm2 binary from release archive
       shell: |
         if [ ! -f "{{ ansible_env['HOME'] }}/mm2/mm2" ]; then
           unzip -o {{ mm2_arch | quote }} -d ./mm2
         fi
       args:
         executable: /bin/bash
+      when: {{ local }} == "false"
+
+      notify: restart marketmaker2
 
     - name: Download latest coins file
       get_url:

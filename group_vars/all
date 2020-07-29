@@ -1,9 +1,10 @@
 ---
 # Basic vars available for all nodes
 
+local: "false"
 rpcpass: "your_rpc_password"
-mm2_tag: "beta-2.0.2179"
-mm2_arch: "mm2-8c2bf3f91-Linux-Debug.zip"
+mm2_tag: "github-tag"
+mm2_arch: "mm2-commit-Linux-Ver.zip"
 mm2_link:
  "https://github.com/KomodoPlatform/atomicDEX-API/releases/download/{{ mm2_tag }}/{{ mm2_arch }}"
 node_exporter_tag: "v1.0.1"

@@ -1,6 +1,6 @@
 {
 	"gui":"nogui",
-	"netid":9999,
+	"netid":8800,
 	"userhome":"{{ ansible_env['HOME'] }}/",
 	"passphrase":"{{ passphrase }}",
 	"rpc_password":"{{ rpcpass }}",
@@ -8,5 +8,7 @@
 	"rpcip":"0.0.0.0",
 	"metrics":120,
 	"prometheusport":9001,
-	"prometheus_credentials":"PROM_USERNAME:PROM_PASSWORD"
+	"prometheus_credentials":"PROM_USERNAME:PROM_PASSWORD",
+	"i_am_seed":{{ relay }},
+	"seednodes":{{ relay_nodes }}
 }

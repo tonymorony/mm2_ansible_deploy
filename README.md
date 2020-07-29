@@ -34,16 +34,21 @@ $ ssh-add /path/to/your/key
 ...
     mm2instance00:
       hosts:
-        "00.server.domain"
+        "host.ip.or.domain.name"
       vars:
-        passphrase: "mm2passphrase0"
-        ansible_user: ansibleuser
+        passphrase: "unique_wif"
+        ansible_user: remoteserveruser
+        relay: "true" # true for realy nodes, false for clients
+        relay_nodes: '["seed", "nodes", "array"]'
 ...
 ```
+
 - Set desired mm2 version in `group_vars/all`
+ to download archive from official releases page
 
 ```yaml
 ...
+local: "false"
 mm2_tag: "beta-2.0.2179"
 mm2_arch: "mm2-8c2bf3f91-Linux-Debug.zip"
 mm2_link:
@@ -52,6 +57,13 @@ mm2_link:
 ```
 
 Use link to [official release](https://github.com/KomodoPlatform/atomicDEX-API/releases)
+
+Alternatively, place desired mm2 binary in repo root directory
+as mm2.tar.gz archive and set `local` variable as `true`:
+
+```yaml
+local: "true"
+```
 
 - You might want to customise your mm2 settings by editing `roles/mm2/templates/MM2.json.j2` file.
  Passprase (WIF) is set in `hosts.yml`,
@@ -63,4 +75,4 @@ Use link to [official release](https://github.com/KomodoPlatform/atomicDEX-API/r
  $ ansible-playbook deploy.yml -i hosts.yml
 ```
 
-- Enjoy your mm2 installation
+- Enjoy
