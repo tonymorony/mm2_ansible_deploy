@@ -1,0 +1,38 @@
+---
+filebeat.inputs:
+
+- type: log
+  enabled: true
+  paths:
+    - {{ ansible_env['HOME'] }}/mm2/mm.log
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+
+  reload.enabled: false
+
+setup.template.settings:
+  index.number_of_shards: 1
+
+setup.kibana:
+
+cloud.id: {{ filebeat_cid }}
+cloud.auth: {{ filebeat_cauth }}
+
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+processors:
+  - add_host_metadata:
+      name: {{ ansible_default_ipv4['address'] }}
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~

@@ -11,3 +11,7 @@
 - name: restart nodeexporter
   become: true
   service: name=nodeexporter state=restarted
+
+- name: restart filebeat
+  become: true
+  service: name=filebeat state=restarted

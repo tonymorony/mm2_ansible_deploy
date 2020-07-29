@@ -18,6 +18,7 @@
           - wget
           - ntp
           - nginx
+          - jq
 
 - name: Start NTP service
   become: true
@@ -30,35 +31,34 @@
         src: ./mm2.tar.gz
         dest: "{{ ansible_env['HOME'] }}"
         mode: "755"
-        backup: yes
-      when: {{ local }} == "true"
+        backup: true
+      when: local == "true"
 
     - name: Download mm2 archive from github
       get_url:
         url: "{{ mm2_link }}"
         dest: "{{ ansible_env['HOME'] }}"
-      when: {{ local }} == "false"
+      when: local == false
+
+    - name: Create a mm2 directory if it does not exist
+      file:
+        path: "{{ ansible_env['HOME'] }}/mm2"
+        state: directory
 
     - name: Extract mm2 binary from local archive
-      shell: |
-        if [ ! -f "{{ ansible_env['HOME'] }}/mm2/mm2" ]; then
-          mkdir mm2
-          tar xvzf ./mm2.tar.gz -C mm2
-        fi
-      args:
-        executable: /bin/bash
-      when: {{ local }} == "true"
+      unarchive:
+        src: "{{ ansible_env['HOME'] }}/mm2.tar.gz"
+        dest: "{{ ansible_env['HOME'] }}/mm2"
+        remote_src: true
+      when: local == "true"
       notify: restart marketmaker2
 
     - name: Extract mm2 binary from release archive
-      shell: |
-        if [ ! -f "{{ ansible_env['HOME'] }}/mm2/mm2" ]; then
-          unzip -o {{ mm2_arch | quote }} -d ./mm2
-        fi
-      args:
-        executable: /bin/bash
-      when: {{ local }} == "false"
-
+      unarchive:
+        src: "{{ ansible_env['HOME'] }}/{{ mm2_arch }}"
+        dest: "{{ ansible_env['HOME'] }}/mm2"
+        remote_src: true
+      when: local == false
       notify: restart marketmaker2
 
     - name: Download latest coins file
@@ -121,14 +121,18 @@
         url: "{{ node_exporter_link }}"
         dest: "{{ ansible_env['HOME'] }}"
 
+    - name: Create a nodeexporter directory if it does not exist
+      file:
+        path: "{{ ansible_env['HOME'] }}/node_exporter"
+        state: directory
+
     - name: Extract node_exporter from archive
-      shell: |
-        if [ ! -f "{{ ansible_env['HOME'] }}/node_exporter/node_exporter" ]; then
-          mkdir node_exporter
-          tar xvzf {{ node_exporter_arch | quote }} -C node_exporter --strip-components=1
-        fi
-      args:
-        executable: /bin/bash
+      unarchive:
+        src: "{{ ansible_env['HOME'] }}/{{ node_exporter_arch }}"
+        dest: "{{ ansible_env['HOME'] }}/node_exporter"
+        remote_src: true
+        extra_opts:
+          - --strip-components=1
 
     - name: Create node_exporter binary link
       become: true
@@ -144,3 +148,24 @@
     - name: Start NodeExporter service
       become: true
       service: name=nodeexporter state=started enabled=yes
+
+- name: Setup filebeat
+  block:
+    - name: Download firebeat .deb package
+      get_url:
+        url: "{{ filebeat_deb_link }}"
+        dest: "{{ ansible_env['HOME'] }}"
+
+    - name: Install filebeat
+      become: true
+      apt:
+        deb: "{{ ansible_env['HOME'] }}/{{ filebeat_arch }}"
+
+    - name: Setup filebeat config
+      become: true
+      template: src=filebeat.yml.j2 dest=/etc/filebeat/filebeat.yml
+      notify: restart filebeat
+
+    - name: Start filebeat
+      become: true
+      service: name=filebeat state=started enabled=yes
