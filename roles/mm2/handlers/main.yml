@@ -2,16 +2,20 @@
 
 - name: restart nginx
   become: true
+  daemon_reload: true
   service: name=nginx state=reloaded
 
 - name: restart marketmaker2
   become: true
+  daemon_reload: true
   service: name=marketmaker2 state=restarted
 
 - name: restart nodeexporter
   become: true
+  daemon_reload: true
   service: name=nodeexporter state=restarted
 
 - name: restart filebeat
   become: true
+  daemon_reload: true
   service: name=filebeat state=restarted
