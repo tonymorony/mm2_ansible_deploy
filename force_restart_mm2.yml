@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - name: restart marketmaker2
+      become: true
+      systemd:
+        name: marketmaker2
+        daemon_reload: true
+        state: restarted
+        enabled: true

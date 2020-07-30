@@ -1,21 +1,32 @@
 ---
-
 - name: restart nginx
   become: true
-  daemon_reload: true
-  service: name=nginx state=reloaded
+  systemd:
+    name: nginx
+    daemon_reload: true
+    state: restarted
+    enabled: true
 
 - name: restart marketmaker2
   become: true
-  daemon_reload: true
-  service: name=marketmaker2 state=restarted
+  systemd:
+    name: marketmaker2
+    daemon_reload: true
+    state: restarted
+    enabled: true
 
 - name: restart nodeexporter
   become: true
-  daemon_reload: true
-  service: name=nodeexporter state=restarted
+  systemd:
+    name: nodeexplorer
+    daemon_reload: true
+    state: restarted
+    enabled: true
 
 - name: restart filebeat
   become: true
-  daemon_reload: true
-  service: name=filebeat state=restarted
+  systemd:
+    name: filebeat
+    daemon_reload: true
+    state: restarted
+    enabled: true
