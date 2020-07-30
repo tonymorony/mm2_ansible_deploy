@@ -4,7 +4,7 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - "{{ ansible_env['HOME'] }}/mm2/mm.log"
+    - "{{ ansible_env['HOME'] }}/mm2/mm2_std.log"
 
 filebeat.config.modules:
   path: "${path.config}/modules.d/*.yml"

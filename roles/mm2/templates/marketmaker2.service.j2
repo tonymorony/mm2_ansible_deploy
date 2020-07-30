@@ -4,6 +4,8 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+StandardOutput=file:{{ ansible_env['PWD'] }}/mm2/mm2_std.log
+StandardError=file:{{ ansible_env['PWD'] }}/mm2/mm2_std.log
 Environment=MM_CONF_PATH={{ ansible_env['PWD'] }}/mm2/MM2.json
 Environment=MM_COINS_PATH={{ ansible_env['PWD'] }}/mm2/coins
 Environment=MM_LOG={{ ansible_env['PWD'] }}/mm2/mm.log
