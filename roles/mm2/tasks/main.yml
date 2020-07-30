@@ -166,6 +166,15 @@
       template: src=filebeat.yml.j2 dest=/etc/filebeat/filebeat.yml
       notify: restart filebeat
 
+    - name: Check logstash module status
+      stat: /etc/filebeat/modules.d/logstash.yml.disabled
+      register: st
+
+    - name: Enable logstash module
+      become: true
+      command: mv /etc/filebeat/modules.d/logstash.yml.disabled /etc/filebeat/modules.d/logstash.yml
+      when: st.stat.exists
+
     - name: Start filebeat
       become: true
       service: name=filebeat state=started enabled=yes
