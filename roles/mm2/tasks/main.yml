@@ -167,7 +167,8 @@
       notify: restart filebeat
 
     - name: Check logstash module status
-      stat: /etc/filebeat/modules.d/logstash.yml.disabled
+      stat:
+        path: /etc/filebeat/modules.d/logstash.yml.disabled
       register: st
 
     - name: Enable logstash module
